@@ -1,5 +1,9 @@
 # stb-image-resize-opt
 
+[![CI](https://github.com/aplghl/stb-image-resize-opt/actions/workflows/ci.yml/badge.svg)](https://github.com/aplghl/stb-image-resize-opt/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/aplghl/stb-image-resize-opt)](https://github.com/aplghl/stb-image-resize-opt/releases/latest)
+[![License: MIT OR Unlicense](https://img.shields.io/badge/license-MIT%20OR%20Unlicense-blue.svg)](#license)
+
 A performance fork of [stb_image_resize2](https://github.com/nothings/stb)
 (`stb_image_resize2.h` v2.18) that is a **byte-identical drop-in replacement**.
 The resampler source is *unchanged*; the speedup comes from a prebuilt static
