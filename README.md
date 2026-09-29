@@ -27,12 +27,12 @@ and **held-out** PGO. Intel i7-14700F, clang 23.1.2, WSL2. Reproduce with
 
 | workload | speedup vs upstream `-O2` |
 | --- | --- |
-| Mixed suite (`results/summary.csv`) | **+38.0% geomean** (held-out PGO; +32.8% no PGO) |
+| Mixed suite (`results/summary.csv`) | **+36–38% geomean** (held-out PGO; +32.8% no PGO) |
 | AVX2 vs base, isolated (`results/kernels.csv`) | **+34.9% geomean** (non-half) |
-| uint8 / uint16 / float | 1.2–1.6× per row |
-| sRGB (weakest regime) | 1.10–1.15× |
+| uint8 / uint16 / float | 1.2–1.7× per row |
+| sRGB (weakest regime) | 1.10–1.22× |
 | `half` output | 1.0× (baseline by design) |
-| downstream consumer (`make consumer`) | **1.16×** (honest lower bound) |
+| downstream consumer (`make consumer`) | **1.23×** (held-out PGO; honest lower bound) |
 
 The sRGB conversion path and extreme-downsample coefficient build are the
 remaining headroom (`docs/REJECTED.md`).

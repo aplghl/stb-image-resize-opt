@@ -22,10 +22,10 @@ Key numbers (regenerate with the commands above):
 
 - Runtime **AVX2 vs base** (isolated, `kernels.csv`): **+34.9% geomean** on
   non-half rows; half output is deliberately baseline (signed-zero exactness).
-- **Upstream `-O2` vs dispatched library**: ~**+33-38%** geomean (held-out PGO),
-  with the sRGB regime at +10-14%.
-- **Downstream consumer** (sRGB RGBA, links the `.a`): **~1.16x** — the honest
-  lower bound, because sRGB conversion is the weakest AVX2 regime.
+- **Upstream `-O2` vs dispatched library**: ~**+36-38%** geomean (held-out PGO),
+  with the sRGB regime at +10-22%.
+- **Downstream consumer** (sRGB RGBA, links the `.a`): **~1.23x** (held-out PGO)
+  — the honest lower bound, because sRGB conversion is the weakest AVX2 regime.
 
 > The sRGB regime and extreme downsample coefficient build are the remaining
 > headroom (`docs/REJECTED.md`).
