@@ -6,3 +6,5 @@ gmon.out
 *.a
 *.profraw
 *.profdata
+
+dist/
