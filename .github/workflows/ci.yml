@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  oracle-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: verify oracle hash
+        run: |
+          echo "173e654634f6ccaad98f603e686ea212eec1fe8ea6d2a5e5e8056efa10ae3880  upstream/stb_image_resize2.h" | sha256sum -c -
+
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y clang make
+      - name: build signed library
+        run: CC=clang bash scripts/build_opt.sh exact
+      - name: differential (all dispatch paths)
+        run: CC=clang bash harness/diff_lib.sh build/lib_exact/libstb_image_resize2.a
+      - name: ABI
+        run: CC=clang bash harness/abi.sh
+      - name: non-vacuous
+        run: CC=clang bash harness/nonvacuous.sh
+
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y clang
+      - run: CC=clang bash harness/sanitize.sh
+        env:
+          STBIR_CPU: base
+
+  cross:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+      - name: cross-compile
+        run: |
+          for t in aarch64-linux-musl x86_64-windows-gnu aarch64-macos; do
+            zig cc -target "$t" -O2 -ffp-contract=off -I src -c lib/stb_image_resize2.c -o /dev/null
+          done
+      - name: zig build (native + aarch64)
+        run: |
+          zig build -Doptimize=ReleaseFast
+          zig build -Doptimize=ReleaseFast -Dtarget=aarch64-linux-musl

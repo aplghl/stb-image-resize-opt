@@ -1,0 +1,8 @@
+# UBSan ignorelist for stb_image_resize2 (oracle and candidate identical).
+#
+# Pre-existing false positive: the sRGB encode coders index
+# `fp32_to_srgb8_tab4` through a deliberately pre-offset pointer
+# (table - (127-13)*8), so UBSan's declared-array bounds check fires on reads
+# that are in range relative to the real array. Present in the pristine
+# upstream header; documented, not fixed. Scope it to the three encoders.
+fun:*encode_uint8_srgb*

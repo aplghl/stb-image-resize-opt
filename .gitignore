@@ -1,0 +1,8 @@
+build/
+zig-out/
+.zig-cache/
+gmon.out
+*.o
+*.a
+*.profraw
+*.profdata
