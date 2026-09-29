@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-linux-gnu
+          - target: x86_64-linux-musl
+          - target: aarch64-linux-musl
+          - target: x86_64-windows-gnu
+          - target: aarch64-macos
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Zig 0.16.0
+        run: |
+          curl -fsSL -o /tmp/zig.tar.xz https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz
+          echo "70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/zig.tar.xz" | sha256sum -c -
+          mkdir -p "$HOME/.local/zig"
+          tar -xJf /tmp/zig.tar.xz -C "$HOME/.local/zig" --strip-components=1
+          echo "$HOME/.local/zig" >> "$GITHUB_PATH"
+      - name: Build
+        run: zig build -Doptimize=ReleaseFast -Dtarget=${{ matrix.target }}
+      - name: Package
+        run: |
+          mkdir -p dist/${{ matrix.target }}
+          cp zig-out/lib/* dist/${{ matrix.target }}/
+          cp src/stb_image_resize2.h dist/${{ matrix.target }}/
+          (cd dist && tar czf stb-image-resize-opt-${{ matrix.target }}.tar.gz ${{ matrix.target }})
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stb-image-resize-opt-${{ matrix.target }}
+          path: dist/stb-image-resize-opt-${{ matrix.target }}.tar.gz
+
+  release:
+    needs: build-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES="docs/releases/${GITHUB_REF_NAME}.md"
+          [ -f "$NOTES" ] || NOTES="CHANGELOG.md"
+          gh release create "${GITHUB_REF_NAME}" dist/*.tar.gz \
+            --title "stb-image-resize-opt ${GITHUB_REF_NAME}" \
+            --notes-file "$NOTES" \
+            || gh release upload "${GITHUB_REF_NAME}" dist/*.tar.gz --clobber
